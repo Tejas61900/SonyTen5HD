@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Cricket Stream</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: #0e0e0e;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      text-align: center;
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #video-container {
+      width: 90%;
+      max-width: 960px;
+      border: 2px solid #00f2fe;
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.4);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      background: black;
+    }
+
+    #loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px 25px;
+      border-radius: 8px;
+      animation: pulse 1.5s infinite;
+      text-align: center;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏏 LIVE CRICKET</h1>
+
+  <div id="video-container">
+    <div id="loader">Loading stream...</div>
+    <video id="video" controls playsinline></video>
+  </div>
+
+  <!-- hls.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const loader = document.getElementById('loader');
+    const streamUrl = 'https://dai.google.com/ssai/event/nmQFuHURTYGQBNdUG-2Qdw/master.m3u8';
+
+    function isSafari() {
+      return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    }
+
+    if (isSafari()) {
+      // iOS Safari native playback
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', () => {
+        loader.style.display = 'none';
+        video.play();
+      });
+      video.addEventListener('error', () => {
+        loader.innerText = 'Stream failed to load.';
+      });
+    } else if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        loader.style.display = 'none';
+        video.play();
+      });
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error("HLS.js error:", data);
+        loader.innerText = 'Stream failed to load.';
+      });
+    } else {
+      loader.innerText = "Your browser doesn't support HLS.";
+    }
+
+    // Optional: Spacebar toggle for play/pause
+    document.body.onkeyup = e => {
+      if (e.code === 'Space') {
+        video.paused ? video.play() : video.pause();
+      }
+    };
+  </script>
+
+</body>
+</html>
