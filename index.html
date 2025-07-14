@@ -86,11 +86,8 @@
     }
 
     if (isSafari()) {
-      // iOS Safari native playback
-      video.src = streamUrl;
-      video.addEventListener('loadedmetadata', () => {
-        loader.style.display = 'none';
-        video.play();
+  // Open stream natively in Safari
+      window.location.href = streamUrl;
       });
       video.addEventListener('error', () => {
         loader.innerText = 'Stream failed to load.';
